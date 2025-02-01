@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mortgage Calculator</title>
+    <link rel="website icon" type="png"
+        href="https://w7.pngwing.com/pngs/225/1002/png-transparent-bar-graph-illustration-bar-chart-graph-of-a-function-diagram-growth-album-template-miscellaneous-angle-text-thumbnail.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 800px;
+            justify-content: space-between;
+        }
+
+        .form-container {
+            width: 45%;
+        }
+
+        .chart-container {
+            width: 45%;
+            display: none;
+        }
+
+        input,
+        button {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background: #28a745;
+            /* Yeşil renk */
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #218838;
+            /* Daha koyu yeşil */
+        }
+
+        #result {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h2>Mortgage Calculator</h2>
+            <label for="amount">Loan Amount ($):</label>
+            <input type="number" id="amount" placeholder="Enter loan amount">
+
+            <label for="interest">Annual Interest Rate (%):</label>
+            <input type="number" id="interest" placeholder="Enter interest rate">
+
+            <label for="years">Loan Term (Years):</label>
+            <input type="number" id="years" placeholder="Enter loan term">
+
+            <button onclick="calculateMortgage()">Calculate</button>
+
+            <div id="result"></div>
+        </div>
+        <div class="chart-container" id="chartContainer">
+            <canvas id="mortgageChart" width="400" height="400"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function calculateMortgage() {
+            let amount = parseFloat(document.getElementById("amount").value);
+            let interest = parseFloat(document.getElementById("interest").value) / 100 / 12;
+            let years = parseFloat(document.getElementById("years").value) * 12;
+
+            if (!amount || !interest || !years) {
+                document.getElementById("result").innerHTML = "Please enter valid values.";
+                return;
+            }
+
+            let monthlyPayment = (amount * interest) / (1 - Math.pow(1 + interest, -years));
+            let totalPayment = monthlyPayment * years;
+            let totalInterest = totalPayment - amount;
+
+            console.log("Principal:", amount); // Kontrol için
+            console.log("Interest:", totalInterest); // Kontrol için
+
+            document.getElementById("result").innerHTML = `Monthly Payment: $${monthlyPayment.toFixed(2)}`;
+
+            document.getElementById("chartContainer").style.display = "block";
+            drawChart(amount, totalInterest);
+        }
+
+        function drawChart(principal, interest) {
+            const ctx = document.getElementById('mortgageChart').getContext('2d');
+            if (window.mortgageChart && typeof window.mortgageChart.destroy === 'function') {
+                window.mortgageChart.destroy();
+            }
+            window.mortgageChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Principal', 'Interest'],
+                    datasets: [{
+                        data: [principal, interest],
+                        backgroundColor: ['#6f42c1', '#fd7e14'], // Mor ve turuncu
+                        hoverBackgroundColor: ['#563d7c', '#d9534f'] // Daha koyu mor ve kırmızı
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                        tooltip: {
+                            enabled: true,
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
